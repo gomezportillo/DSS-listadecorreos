@@ -1,4 +1,4 @@
-package comunicacion;
+package communication;
 
 import java.util.List;
 import java.io.IOException;
