@@ -34,7 +34,7 @@ public class User implements Serializable {
 	@Override
 	public String toString() 
 	{
-		return "User: " + this.name + " " + this.surname + " " + this.email;
+		return "User [name=" + this.name + ", surname=" + this.surname + ", email=" + this.email + "]";
 	}
 
 	public long getId() 
