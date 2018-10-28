@@ -11,12 +11,10 @@ import javax.persistence.Query;
 public class BDUser 
 {
 	private static final String PERSISTENCE_UNIT_NAME = "user";
-	private static EntityManagerFactory factory;
 
 	public static void insertar(User u) 
 	{
-		factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		EntityManager em = factory.createEntityManager();
+		EntityManager em = createEntityManager();
 
 		if ( ! emailExists(u.getEmail()) ) 
 		{
@@ -29,12 +27,11 @@ public class BDUser
 
 	public static void update(User u) 
 	{
-		factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		EntityManager em = factory.createEntityManager();
+		EntityManager em = createEntityManager();
 
 		if ( emailExists(u.getEmail()) ) 
 		{
-			Query q = em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email");
+			Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
 			q.setParameter("email", u.getEmail());
 
 			User result = (User) q.getSingleResult();
@@ -50,12 +47,11 @@ public class BDUser
 
 	public static void delete(User u) 
 	{
-		factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		EntityManager em = factory.createEntityManager();
+		EntityManager em = createEntityManager();
 
 		if ( emailExists(u.getEmail()) ) 
 		{
-			Query q = em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email");
+			Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
 			q.setParameter("email", u.getEmail());
 
 			User result = (User) q.getSingleResult();
@@ -69,14 +65,13 @@ public class BDUser
 
 	public static User selectUser(String email)
 	{
-		factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		EntityManager em = factory.createEntityManager();
+		EntityManager em = createEntityManager();
 
 		User result = null;
 
 		if ( emailExists(email) ) 
 		{
-			Query q = em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email");
+			Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
 			q.setParameter("email", email);
 			result = (User) q.getSingleResult();
 			em.close();
@@ -86,10 +81,9 @@ public class BDUser
 
 	public static boolean emailExists(String email) 
 	{
-		factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		EntityManager em = factory.createEntityManager();
+		EntityManager em = createEntityManager();
 
-		Query q = em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email");
+		Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
 		q.setParameter("email", email);
 
 		try 
@@ -109,15 +103,20 @@ public class BDUser
 
 	public static List<User> listarUsuarios() 
 	{
-		factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		EntityManager em = factory.createEntityManager();
+		EntityManager em = createEntityManager();
 
-		Query q = em.createQuery("SELECT u FROM Usuario u");
+		Query q = em.createQuery("SELECT u FROM User u");
 
 		@SuppressWarnings("unchecked")
 		List<User> result = q.getResultList();
 		em.close();
 
 		return result;
+	}
+	
+	private static EntityManager createEntityManager()
+	{
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+		return factory.createEntityManager();
 	}
 }
