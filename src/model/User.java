@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.persistence.Id;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.Transient;
 import javax.persistence.GenerationType;
 
 @Entity
@@ -19,6 +20,9 @@ public class User implements Serializable {
 	private String surname;
 	private String email;
 
+	@Transient
+	private int this_variable_will_not_be_saved;
+	
 	public User() 
 	{
 		name = surname = email = "";
