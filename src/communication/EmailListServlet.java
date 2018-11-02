@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import model.BDUser;
 import model.User;
 
-@WebServlet("/ListaCorreosServlet")
+@WebServlet("/EmailListServlet")
 public class EmailListServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 4203674193098824226L;
