@@ -2,14 +2,14 @@
 <persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
 	version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
-	<persistence-unit name="user" transaction-type="RESOURCE_LOCAL">
-	    <class>model.User</class>
+	<persistence-unit name="myuser" transaction-type="RESOURCE_LOCAL">
+	    <class>model.MyUser</class>
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
 			<property name="javax.persistence.jdbc.url" value="jdbc:derby:ddbb; create=true" />
-			<property name="javax.persistence.jdbc.user" value="test" />
-			<property name="javax.persistence.jdbc.password" value="test" />
-			
+			<property name="javax.persistence.jdbc.user" value="" />
+			<property name="javax.persistence.jdbc.password" value="" />
+
 			<!-- Connection Pool -->
 			<property name="eclipselink.connection-pool.default.initial" value="1" />
 			<property name="eclipselink.connection-pool.node2.min" value="16"/>

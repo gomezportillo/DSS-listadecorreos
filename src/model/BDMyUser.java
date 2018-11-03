@@ -8,15 +8,15 @@ import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
-public class BDUser 
+public class BDMyUser 
 {
 	private static final String PERSISTENCE_UNIT_NAME = "user";
 
-	public static void insertar(User u) 
+	public static void insert(MyUser u) 
 	{
 		EntityManager em = createEntityManager();
 
-		if ( ! emailExists(u.getEmail()) ) 
+		if (!emailExists(u.getEmail())) 
 		{
 			em.getTransaction().begin();
 			em.persist(u);
@@ -25,55 +25,56 @@ public class BDUser
 		}
 	}
 
-	public static void update(User u) 
+	public static void update(MyUser u) 
 	{
 		EntityManager em = createEntityManager();
 
-		if ( emailExists(u.getEmail()) ) 
+		if (emailExists(u.getEmail())) 
 		{
-			Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
+			Query q = em.createQuery("SELECT u FROM MyUser u WHERE u.email = :email");
 			q.setParameter("email", u.getEmail());
 
-			User result = (User) q.getSingleResult();
-			result.setName(u.getName());
-			result.setSurname(u.getSurname());
+			MyUser resultado = (MyUser) q.getSingleResult();
+			resultado.setName(u.getNname());
+			resultado.setSurname(u.getSurname());
 
 			em.getTransaction().begin();
-			em.merge(result);
+			em.merge(resultado);
 			em.getTransaction().commit();
 			em.close();
 		}
 	}
 
-	public static void delete(User u) 
+	public static void delete(MyUser u) 
 	{
 		EntityManager em = createEntityManager();
 
-		if ( emailExists(u.getEmail()) ) 
+
+		if (emailExists(u.getEmail())) 
 		{
-			Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
+			Query q = em.createQuery("SELECT u FROM MyUser u WHERE u.email = :email");
 			q.setParameter("email", u.getEmail());
 
-			User result = (User) q.getSingleResult();
+			MyUser result = (MyUser) q.getSingleResult();
 
 			em.getTransaction().begin();
 			em.remove(result);
-			em.getTransaction().commit();			
+			em.getTransaction().commit();
 			em.close();
 		}
 	}
 
-	public static User selectUser(String email)
+	public static MyUser selectUser(String email) 
 	{
 		EntityManager em = createEntityManager();
 
-		User result = null;
+		MyUser result = null;
 
-		if ( emailExists(email) ) 
+		if (emailExists(email)) 
 		{
-			Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
+			Query q = em.createQuery("SELECT u FROM MyUser u WHERE u.email = :email");
 			q.setParameter("email", email);
-			result = (User) q.getSingleResult();
+			result = (MyUser) q.getSingleResult();
 			em.close();
 		}
 		return result;
@@ -83,7 +84,7 @@ public class BDUser
 	{
 		EntityManager em = createEntityManager();
 
-		Query q = em.createQuery("SELECT u FROM User u WHERE u.email = :email");
+		Query q = em.createQuery("SELECT u FROM MyUser u WHERE u.email = :email");
 		q.setParameter("email", email);
 
 		try 
@@ -91,29 +92,29 @@ public class BDUser
 			q.getSingleResult();
 			return true;
 		} 
-		catch (NoResultException e)
+		catch (NoResultException e) 
 		{
 			return false;
-		}
+		} 
 		finally 
 		{
 			em.close();
 		}
 	}
 
-	public static List<User> listarUsuarios() 
+	@SuppressWarnings("unchecked")
+	public static List<MyUser> listUsers() 
 	{
 		EntityManager em = createEntityManager();
 
-		Query q = em.createQuery("SELECT u FROM User u");
+		Query query = em.createQuery("SELECT u FROM MyUser u");
 
-		@SuppressWarnings("unchecked")
-		List<User> result = q.getResultList();
+		List<MyUser> result = query.getResultList();
 		em.close();
 
 		return result;
 	}
-	
+
 	private static EntityManager createEntityManager()
 	{
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);

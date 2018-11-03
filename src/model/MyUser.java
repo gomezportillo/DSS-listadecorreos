@@ -9,8 +9,8 @@ import javax.persistence.Transient;
 import javax.persistence.GenerationType;
 
 @Entity
-public class User implements Serializable {
-
+public class MyUser implements Serializable 
+{
 	private static final long serialVersionUID = 5115446418810478651L;
 
 	@Id
@@ -23,27 +23,27 @@ public class User implements Serializable {
 	@Transient
 	private int this_variable_will_not_be_saved;
 	
-	public User() 
+	public MyUser() 
 	{
-		name = surname = email = "";
+		this.name = this.surname = this.email = "";
 	}
 
-	public User(User u)
+	public MyUser(MyUser u) 
 	{
-		name = u.getName();
-		surname = u.getSurname();
-		email = u.getEmail();
+		this.name = u.getNname();
+		this.surname = u.getSurname();
+		this.email = u.getEmail();
 	}
 
 	@Override
 	public String toString() 
 	{
-		return "User [name=" + this.name + ", surname=" + this.surname + ", email=" + this.email + "]";
+		return "User [nombre=" + this.name + ", apellido=" + this.surname + ", email=" + this.email + "]";
 	}
 
 	public long getId() 
 	{
-		return id;
+		return this.id;
 	}
 
 	public void setId(long id) 
@@ -51,19 +51,19 @@ public class User implements Serializable {
 		this.id = id;
 	}
 
-	public String getName() 
+	public String getNname() 
 	{
-		return name;
+		return this.name;
 	}
 
-	public void setName(String n)
+	public void setName(String n) 
 	{
 		this.name = n;
 	}
 
 	public String getSurname() 
 	{
-		return surname;
+		return this.surname;
 	}
 
 	public void setSurname(String s) 
@@ -73,7 +73,7 @@ public class User implements Serializable {
 
 	public String getEmail() 
 	{
-		return email;
+		return this.email;
 	}
 
 	public void setEmail(String e) 
