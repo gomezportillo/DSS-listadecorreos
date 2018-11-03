@@ -10,7 +10,7 @@ import javax.persistence.Query;
 
 public class BDMyUser 
 {
-	private static final String PERSISTENCE_UNIT_NAME = "user";
+	private static final String PERSISTENCE_UNIT_NAME = "myuser";
 
 	public static void insert(MyUser u) 
 	{

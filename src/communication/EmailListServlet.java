@@ -6,83 +6,112 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import model.BDUser;
-import model.User;
+import model.BDMyUser;
+import model.MyUser;
 
-@WebServlet("/EmailListServlet")
-public class EmailListServlet extends HttpServlet {
+import auxiliary.Templates;
 
+public class EmailListServlet extends HttpServlet 
+{
 	private static final long serialVersionUID = 4203674193098824226L;
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	
+	public EmailListServlet()
+	{
+	}
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException 
 	{
 		String action = request.getParameter("action");
 		String name = request.getParameter("name");
 		String surname = request.getParameter("surname");
 		String email = request.getParameter("email");
-
+		
 		if (action == null) 
 		{
+			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/html");
+
 			PrintWriter writer = response.getWriter();
-			writer.println("<h1>DSS Practise 2: Software Architecture</h1>");
+			
+			String webpage = Templates.html_template;
+			writer.println(webpage);
+			
+			for (MyUser u: BDMyUser.listUsers()) 
+			{
+				writer.println("<tr>");
+				writer.println("<td>" + u.getNname() + "</td>");
+				writer.println("<td>" + u.getSurname() + "</td>");
+				writer.println("<td>" + u.getEmail() + "</td>");
+				writer.println("</tr>");
+			}
+			writer.println("</tbody></table></div></div></body></html>");
 		} 
 		else 
 		{
-			PrintWriter writer = response.getWriter();
+			ObjectOutputStream oos = new ObjectOutputStream(response.getOutputStream());
 
 			switch (action) 
 			{
-			case "listUser":
-				List<User> userList = BDUser.listarUsuarios();
-				ObjectOutputStream objet = new ObjectOutputStream(response.getOutputStream());
-				objet.writeObject(userList);
-				objet.flush();
-				objet.close();
-				break;
-
-			case "deleteUser":
-				if (BDUser.emailExists(email)) 
-				{
-					User user = BDUser.selectUser(email);
-					BDUser.delete(user);
-				} 
-				else 
-				{
-					writer.println("<span> User not found </span>");
-				}
-				break;
-
 			case "addUser":
-				if (!BDUser.emailExists(email)) 
+				if (!BDMyUser.emailExists(email)) 
 				{
-					User user = BDUser.selectUser(email);
-					BDUser.insertar(user);
+					MyUser u = new MyUser(name, surname, email);
+					BDMyUser.insert(u);
+					oos.writeInt(0);
+					oos.writeObject("User added");
 				} 
-				else 
+				else
 				{
-					writer.println("<span> El usuario ya existe </span>");
+					oos.writeInt(1);
+					oos.writeObject("User with email " + email + "already exists");
 				}
 				break;
 
 			case "updateUser":
-				if (BDUser.emailExists(email)) 
+				if (BDMyUser.emailExists(email)) 
 				{
-					User user = BDUser.selectUser(email);
-					BDUser.update(user);
-				} 
+					MyUser myUser = BDMyUser.selectUser(email);
+					myUser.setName(name);
+					myUser.setSurname(surname);
+					BDMyUser.update(myUser);
+					oos.writeInt(0);
+					oos.writeObject("User updated");
+				}
 				else 
 				{
-					writer.println("<span> El usuario no existe </span>");
+					oos.writeInt(1);
+					oos.writeObject("No user with email " + email);
 				}
 				break;
+				
+			case "deleteUser":
+				if (BDMyUser.emailExists(email)) 
+				{
+					MyUser u = BDMyUser.selectUser(email);
+					BDMyUser.delete(u);
+					oos.writeInt(0);
+					oos.writeObject("User deleted");
+				} 
+				else
+				{
+					oos.writeInt(1);
+					oos.writeObject("No user with email " + email);
+				}
+				break;
+
+			default:
+				List<MyUser> user_list = BDMyUser.listUsers();
+				oos.writeObject(user_list);
+				break;
 			}
+
+			oos.flush();
+			oos.close();
 		}
 	}
 

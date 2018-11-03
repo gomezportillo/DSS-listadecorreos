@@ -34,6 +34,13 @@ public class MyUser implements Serializable
 		this.surname = u.getSurname();
 		this.email = u.getEmail();
 	}
+	
+	public MyUser(String name, String surname, String email)
+	{
+		this.name = name;
+		this.surname = surname;
+		this.email = email;
+	}
 
 	@Override
 	public String toString() 
