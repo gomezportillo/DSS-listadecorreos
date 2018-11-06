@@ -36,7 +36,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 
 import model.MyUser;
-import myinterface.Client;
+import auxiliary.Codes;
 
 public class Client {
 
@@ -117,21 +117,28 @@ public class Client {
 
 					int response_code = performActionInServer(user, "addUser");
 
-					if (response_code == 0)
+					switch ( response_code )
 					{
+					case Codes.SUCCESS :
 						DefaultTableModel model = (DefaultTableModel) table.getModel();
-						model.addRow( new Object[]{ name, surname, email } );
+						model.addRow( new Object[]{ user.getName(), user.getSurname(), user.getEmail() } );
 						nameTF.setText("");
 						surnameTF.setText("");
 						emailTF.setText("");
 
-						lblInfo.setText("Info: User with email " + email + " added.");
+						lblInfo.setText("Info: User with email " + user.getEmail() + " added.");
 						lblInfo.setForeground(Color.green);
-					}
-					else
-					{
-						lblInfo.setText("Info: Error adding user.");
+						break;
+
+					case Codes.EMAIL_ALREADY_EXISTS:
+						lblInfo.setText("Info: Error adding user, email " + user.getEmail() + " already exists.");
 						lblInfo.setForeground(Color.red);
+						break;
+
+					default:
+						lblInfo.setText("Info: Unkown error adding user.");
+						lblInfo.setForeground(Color.red);
+						break;
 					}
 				}
 			}
@@ -160,23 +167,30 @@ public class Client {
 
 					int response_code = performActionInServer(user, "updateUser");
 
-					if (response_code == 0)
+					switch (response_code)
 					{
+					case Codes.SUCCESS:
 						DefaultTableModel model = (DefaultTableModel) table.getModel();
-						model.addRow( new Object[]{ name, surname, email } );
+						model.addRow( new Object[]{ user.getName(), user.getSurname(), user.getEmail() } );
 						nameTF.setText("");
 						surnameTF.setText("");
 						emailTF.setText("");
 
 						updateTable();
 
-						lblInfo.setText("Info: User with email " + email + " updated.");
+						lblInfo.setText("Info: User with email " + user.getEmail() + " updated.");
 						lblInfo.setForeground(Color.green);
-					}
-					else
-					{
-						lblInfo.setText("Info: Error updating user with email " + email + ".");
+						break;
+
+					case Codes.EMAIL_NOT_FOUND:
+						lblInfo.setText("Info: Error updating user, email " + email + " not found.");
 						lblInfo.setForeground(Color.red);
+						break;
+
+					default:
+						lblInfo.setText("Info: Unknown error updating user.");
+						lblInfo.setForeground(Color.red);
+						break;
 					}
 				}
 			}
@@ -200,7 +214,7 @@ public class Client {
 					Map<String,String> parameters = new HashMap<String, String>();
 					parameters.put("action", "deleteUser");
 					parameters.put("email", email);
-					int response_code = 1;
+					int response_code = Codes.NO_CODE;
 
 					try
 					{
@@ -210,19 +224,26 @@ public class Client {
 					catch (Exception e1)
 					{
 						e1.printStackTrace();
-						response_code = 1;
+						response_code = Codes.UNKNOWN_ERROR;
 					}
 
-					if (response_code == 0)
+					switch (response_code)
 					{
+					case Codes.SUCCESS:
 						((DefaultTableModel) table.getModel()).removeRow( rowIndex );
 						lblInfo.setText("Info: User with email " + email + " deleted.");
 						lblInfo.setForeground(Color.green);
-					}
-					else
-					{
-						lblInfo.setText("Info: Error deleting user with email " + email + ".");
+						break;
+
+					case Codes.EMAIL_NOT_FOUND:
+						lblInfo.setText("Info: Error deleting user, email " + email + " not found.");
 						lblInfo.setForeground(Color.red);
+						break;
+
+					default:
+						lblInfo.setText("Info: Unknown error deleting user, email " + email + " not found.");
+						lblInfo.setForeground(Color.red);
+						break;
 					}
 				}
 				else

@@ -13,35 +13,36 @@ import javax.servlet.http.HttpServletResponse;
 import auxiliary.Templates;
 import model.BDMyUser;
 import model.MyUser;
+import auxiliary.Codes;
 
 public class EmailListServlet extends HttpServlet 
 {
 	private static final long serialVersionUID = 4203674193098824226L;
-	
+
 	public EmailListServlet()
 	{
 	}
-	
+
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException 
 	{
 		String action = request.getParameter("action");
 		System.out.println("SERVLET ACTION: " + action);
-		
+
 		String name = request.getParameter("name");
 		String surname = request.getParameter("surname");
 		String email = request.getParameter("email");
-		
+
 		if (action == null) //generate webpage
 		{
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/html");
 
 			PrintWriter writer = response.getWriter();
-			
+
 			String webpage = Templates.html_template;
 			writer.println(webpage);
-			
+
 			for (MyUser u: BDMyUser.listUsers()) 
 			{
 				writer.println("<tr>");
@@ -63,13 +64,11 @@ public class EmailListServlet extends HttpServlet
 				{
 					MyUser u = new MyUser(name, surname, email);
 					BDMyUser.insert(u);
-					oos.writeInt(0);
-					oos.writeObject("User added");
+					oos.writeInt( Codes.SUCCESS );
 				} 
 				else
 				{
-					oos.writeInt(1);
-					oos.writeObject("User with email " + email + "already exists");
+					oos.writeInt( Codes.EMAIL_ALREADY_EXISTS );
 				}
 				break;
 
@@ -80,36 +79,34 @@ public class EmailListServlet extends HttpServlet
 					myUser.setName(name);
 					myUser.setSurname(surname);
 					BDMyUser.update(myUser);
-					oos.writeInt(0);
-					oos.writeObject("User updated");
+					oos.writeInt( Codes.SUCCESS );
 				}
 				else 
 				{
-					oos.writeInt(1);
-					oos.writeObject("No user with email " + email);
+					oos.writeInt( Codes.EMAIL_NOT_FOUND );
 				}
 				break;
-				
+
 			case "deleteUser":
 				if (BDMyUser.emailExists(email)) 
 				{
 					MyUser u = BDMyUser.selectUser(email);
 					BDMyUser.delete(u);
-					oos.writeInt(0);
-					oos.writeObject("User deleted");
+					oos.writeInt( Codes.SUCCESS );
 				} 
 				else
 				{
-					oos.writeInt(1);
-					oos.writeObject("No user with email " + email);
+					oos.writeInt( Codes.EMAIL_NOT_FOUND );
 				}
 				break;
 
-			case "ListUsers":
-				System.out.println("Listing users...");
-			default:
+			case "listUsers":
 				List<MyUser> user_list = BDMyUser.listUsers();
 				oos.writeObject(user_list);
+				oos.writeInt( Codes.SUCCESS );
+				break;
+
+			default:
 				break;
 			}
 
