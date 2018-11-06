@@ -17,6 +17,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
@@ -35,6 +36,7 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 
+import model.MyUser;
 import myinterface.Client;
 
 public class Client {
@@ -82,6 +84,13 @@ public class Client {
 	 */
 	public Client() {
 		initialize();
+		
+		List<MyUser> userlist = this.getUserListFromServer();
+		for (MyUser u : userlist)
+		{
+			DefaultTableModel model = (DefaultTableModel) table.getModel();
+			model.addRow( new Object[]{ u.getName(), u.getSurname(), u.getEmail() } );
+		}
 	}
 
 	/**
@@ -93,9 +102,9 @@ public class Client {
 		frmEmailListClient.setBounds(100, 100, 876, 516);
 		frmEmailListClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{0, 0, 0, 576, 0, 0};
+		gridBagLayout.columnWidths = new int[]{0, 110, 0, 0, 576, 0, 0};
 		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		frmEmailListClient.getContentPane().setLayout(gridBagLayout);
 
@@ -108,6 +117,7 @@ public class Client {
 
 		nameTF = new JTextField();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.gridwidth = 2;
 		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField.gridx = 3;
@@ -125,6 +135,9 @@ public class Client {
 		JButton btnAddUser = new JButton("Add user");
 		btnAddUser.addActionListener(new ActionListener() 
 		{
+			/**
+			 * Pressing "Add user"
+			 */
 			public void actionPerformed(ActionEvent e) 
 			{
 				String name = nameTF.getText();
@@ -143,27 +156,25 @@ public class Client {
 					parameters.put("name", name);
 					parameters.put("surname", surname);
 					parameters.put("email", email);
-					int code = 1;
+					int response_code = 1;
 					try 
 					{
 						ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
-						code = response.readInt();
-//						String response_str = (String) response.readObject();					
+						response_code = response.readInt();
 					} 
 					catch (Exception e1) 
 					{
 						e1.printStackTrace();
-						code = 1;
+						response_code = 1;
 					}
 
-					if (code == 0) 
+					if (response_code == 0) 
 					{
 						DefaultTableModel model = (DefaultTableModel) table.getModel();
 						model.addRow( new Object[]{ name, surname, email } );
 						nameTF.setText("");
 						surnameTF.setText("");
-						emailTF.setText("");	
-
+						emailTF.setText("");
 					}
 					else
 					{
@@ -176,6 +187,7 @@ public class Client {
 
 		surnameTF = new JTextField();
 		GridBagConstraints gbc_textField1 = new GridBagConstraints();
+		gbc_textField1.gridwidth = 2;
 		gbc_textField1.insets = new Insets(0, 0, 5, 5);
 		gbc_textField1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField1.gridx = 3;
@@ -192,6 +204,7 @@ public class Client {
 
 		emailTF = new JTextField();
 		GridBagConstraints gbc_textField_1 = new GridBagConstraints();
+		gbc_textField_1.gridwidth = 2;
 		gbc_textField_1.insets = new Insets(0, 0, 5, 5);
 		gbc_textField_1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField_1.gridx = 3;
@@ -200,17 +213,33 @@ public class Client {
 		emailTF.setColumns(10);
 
 		GridBagConstraints gbc_btnAddUser = new GridBagConstraints();
-		gbc_btnAddUser.gridwidth = 2;
 		gbc_btnAddUser.insets = new Insets(0, 0, 5, 5);
 		gbc_btnAddUser.gridx = 1;
 		gbc_btnAddUser.gridy = 7;
 		frmEmailListClient.getContentPane().add(btnAddUser, gbc_btnAddUser);
 
+		JButton btnUpdateUser = new JButton("Update user");
+		btnUpdateUser.addActionListener(new ActionListener() 
+		{
+			/**
+			 * Pressing "Update user"
+			 */
+			public void actionPerformed(ActionEvent e) 
+			{
+
+			}
+		});
+		GridBagConstraints gbc_btnUpdateUser = new GridBagConstraints();
+		gbc_btnUpdateUser.insets = new Insets(0, 0, 5, 5);
+		gbc_btnUpdateUser.gridx = 3;
+		gbc_btnUpdateUser.gridy = 7;
+		frmEmailListClient.getContentPane().add(btnUpdateUser, gbc_btnUpdateUser);
+
 		JPanel panel = new JPanel();
 		panel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_panel = new GridBagConstraints();
 		gbc_panel.gridheight = 2;
-		gbc_panel.gridwidth = 3;
+		gbc_panel.gridwidth = 4;
 		gbc_panel.insets = new Insets(0, 0, 5, 5);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 1;
@@ -236,12 +265,16 @@ public class Client {
 		JButton btnDeleteUser = new JButton("Delete user");
 		btnDeleteUser.addActionListener(new ActionListener() 
 		{
+			/**
+			 * Pressing "Delete user"
+			 */
 			public void actionPerformed(ActionEvent arg0) 
 			{
 
 			}
 		});
 		GridBagConstraints gbc_btnDeleteUser = new GridBagConstraints();
+		gbc_btnDeleteUser.gridwidth = 2;
 		gbc_btnDeleteUser.insets = new Insets(0, 0, 5, 5);
 		gbc_btnDeleteUser.gridx = 1;
 		gbc_btnDeleteUser.gridy = 12;
@@ -249,6 +282,7 @@ public class Client {
 
 		lblInfo = new JLabel("Information regarding the system");
 		GridBagConstraints gbc_lblInfo = new GridBagConstraints();
+		gbc_lblInfo.gridwidth = 2;
 		gbc_lblInfo.insets = new Insets(0, 0, 5, 5);
 		gbc_lblInfo.gridx = 3;
 		gbc_lblInfo.gridy = 12;
@@ -272,21 +306,21 @@ public class Client {
 
 	@SuppressWarnings("deprecation")
 	public InputStream performPOST(String urlString, Map<String,String> parametros) {
-		String cadenaParametros = "";
+		String parameters = "";
 		boolean primerPar = true;
 		for (Map.Entry<String, String> entry : parametros.entrySet()) {
 			if (!primerPar) 
 			{
-				cadenaParametros += "&";
+				parameters += "&";
 			} 
 			else 
 			{
 				primerPar = false;
 			}
-			String parDeParametro = String.format("%s=%s", 
+			String par = String.format("%s=%s", 
 					URLEncoder.encode(entry.getKey()), 
 					URLEncoder.encode(entry.getValue()));
-			cadenaParametros += parDeParametro;
+			parameters += par;
 		}
 		try 
 		{
@@ -296,7 +330,7 @@ public class Client {
 			conexion.setRequestMethod("POST");
 			conexion.setDoOutput(true);
 			OutputStream output = conexion.getOutputStream();
-			output.write(cadenaParametros.getBytes());
+			output.write(parameters.getBytes());
 			output.flush();
 			output.close();
 			return conexion.getInputStream();
@@ -316,4 +350,22 @@ public class Client {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	private List<MyUser> getUserListFromServer() 
+	{
+		Map<String,String> parameters = new HashMap<String, String>();
+		parameters.put("action", "listUsers");
+		List<MyUser> userList = null;
+		try 
+		{
+			ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
+			userList = (List<MyUser>) ois.readObject();	
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return userList;
+
+	}
 }
