@@ -465,7 +465,7 @@ public class Client {
 	private int performActionInServer(MyUser user, String action)
 	{
 		Map<String,String> parameters = new HashMap<String, String>();
-		parameters.put("action", "addUser");
+		parameters.put("action", action);
 		parameters.put("name", user.getName());
 		parameters.put("surname", user.getSurname());
 		parameters.put("email", user.getEmail());
