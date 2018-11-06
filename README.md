@@ -14,6 +14,13 @@ Demo project using [JPA](https://www.ibm.com/support/knowledgecenter/es/SSAW57_l
 * Make sure libraries on *WebContent/WEB-INF/lib/* are included on Build Path.
 * A folder called *ddbb/* will be created on Desktop holding all the info of the dababase
 
+# Run
+
+See [showcase](https://github.com/gomezportillo/dss-listadecorreos#showcase) or
+
+* EmailServlet.java _Run as > Run on Server_
+* Client.java _Run as > Run as Java Application_
+
 # Class diagram
 
 ![doc/img/class-diagram.jpg](doc/img/class-diagram.jpg)
