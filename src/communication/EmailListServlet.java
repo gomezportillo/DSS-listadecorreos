@@ -10,10 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import auxiliary.Templates;
 import model.BDMyUser;
 import model.MyUser;
-
-import auxiliary.Templates;
 
 public class EmailListServlet extends HttpServlet 
 {
@@ -27,11 +26,13 @@ public class EmailListServlet extends HttpServlet
 			throws ServletException, IOException 
 	{
 		String action = request.getParameter("action");
+		System.out.println("SERVLET ACTION: " + action);
+		
 		String name = request.getParameter("name");
 		String surname = request.getParameter("surname");
 		String email = request.getParameter("email");
 		
-		if (action == null) 
+		if (action == null) //generate webpage
 		{
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/html");
@@ -44,7 +45,7 @@ public class EmailListServlet extends HttpServlet
 			for (MyUser u: BDMyUser.listUsers()) 
 			{
 				writer.println("<tr>");
-				writer.println("<td>" + u.getNname() + "</td>");
+				writer.println("<td>" + u.getName() + "</td>");
 				writer.println("<td>" + u.getSurname() + "</td>");
 				writer.println("<td>" + u.getEmail() + "</td>");
 				writer.println("</tr>");
@@ -104,6 +105,8 @@ public class EmailListServlet extends HttpServlet
 				}
 				break;
 
+			case "ListUsers":
+				System.out.println("Listing users...");
 			default:
 				List<MyUser> user_list = BDMyUser.listUsers();
 				oos.writeObject(user_list);

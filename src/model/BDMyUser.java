@@ -35,7 +35,7 @@ public class BDMyUser
 			q.setParameter("email", u.getEmail());
 
 			MyUser resultado = (MyUser) q.getSingleResult();
-			resultado.setName(u.getNname());
+			resultado.setName(u.getName());
 			resultado.setSurname(u.getSurname());
 
 			em.getTransaction().begin();

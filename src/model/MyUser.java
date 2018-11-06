@@ -30,7 +30,7 @@ public class MyUser implements Serializable
 
 	public MyUser(MyUser u) 
 	{
-		this.name = u.getNname();
+		this.name = u.getName();
 		this.surname = u.getSurname();
 		this.email = u.getEmail();
 	}
@@ -58,7 +58,7 @@ public class MyUser implements Serializable
 		this.id = id;
 	}
 
-	public String getNname() 
+	public String getName() 
 	{
 		return this.name;
 	}
