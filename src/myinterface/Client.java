@@ -139,7 +139,7 @@ public class Client {
 				String name = nameTF.getText();
 				String surname = surnameTF.getText();
 				String email = emailTF.getText();
-
+								
 				if (name.equals("") || surname.equals("") || email.equals(""))
 				{
 					lblInfo.setText("Info: No name, surname nor email can be empty for adding a user.");
@@ -147,22 +147,9 @@ public class Client {
 				}
 				else
 				{
-					Map<String,String> parameters = new HashMap<String, String>();
-					parameters.put("action", "addUser");
-					parameters.put("name", name);
-					parameters.put("surname", surname);
-					parameters.put("email", email);
-					int response_code = 1;
-					try 
-					{
-						ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
-						response_code = response.readInt();
-					} 
-					catch (Exception e1) 
-					{
-						e1.printStackTrace();
-						response_code = 1;
-					}
+					MyUser user = new MyUser(name, surname, email);
+
+					int response_code = performActionInServer(user, "addUser");
 
 					if (response_code == 0) 
 					{
@@ -236,23 +223,10 @@ public class Client {
 				}
 				else
 				{
-					Map<String,String> parameters = new HashMap<String, String>();
-					parameters.put("action", "updateUser");
-					parameters.put("name", name);
-					parameters.put("surname", surname);
-					parameters.put("email", email);
-					int response_code = 1;
-					try 
-					{
-						ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
-						response_code = response.readInt();
-					} 
-					catch (Exception e1) 
-					{
-						e1.printStackTrace();
-						response_code = 1;
-					}
+					MyUser user = new MyUser(name, surname, email);
 
+					int response_code = performActionInServer(user, "updateUser");
+					
 					if (response_code == 0) 
 					{
 						DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -322,19 +296,20 @@ public class Client {
 					Map<String,String> parameters = new HashMap<String, String>();
 					parameters.put("action", "deleteUser");
 					parameters.put("email", email);
-					int code = 1;
+					int response_code = 1;
+				
 					try 
 					{
 						ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
-						code = ois.readInt();
+						response_code = ois.readInt();
 					} 
 					catch (Exception e1) 
 					{
 						e1.printStackTrace();
-						code = 1;
+						response_code = 1;
 					}
 
-					if (code == 0)
+					if (response_code == 0)
 					{
 						((DefaultTableModel) table.getModel()).removeRow( rowIndex );
 						lblInfo.setText("Info: User with email " + email + " deleted.");
@@ -456,5 +431,26 @@ public class Client {
 			aux_model = (DefaultTableModel) table.getModel();
 			aux_model.addRow( new Object[]{ u.getName(), u.getSurname(), u.getEmail() } );
 		}
+	}
+	
+	private int performActionInServer(MyUser user, String action)
+	{
+		Map<String,String> parameters = new HashMap<String, String>();
+		parameters.put("action", "addUser");
+		parameters.put("name", user.getName());
+		parameters.put("surname", user.getSurname());
+		parameters.put("email", user.getEmail());
+		int response_code = 1;
+		try 
+		{
+			ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
+			response_code = response.readInt();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			response_code = 1;
+		}
+		return response_code;
 	}
 }
