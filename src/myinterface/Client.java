@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -370,6 +371,21 @@ public class Client {
 			}
 		});
 		mnMenu.add(mntmExit);
+		
+		JMenu mnHelp = new JMenu("Help");
+		menuBar.add(mnHelp);
+		
+		JMenuItem mntmAbout = new JMenuItem("About");
+		mntmAbout.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent arg0) 
+			{
+				JOptionPane.showMessageDialog(mntmAbout, "Developed by Pedro Manuel Gómez-Portillo",
+					    "Delevoper",
+					    JOptionPane.INFORMATION_MESSAGE, null);
+			}
+		});
+		mnHelp.add(mntmAbout);
 	}
 
 	public InputStream performPOST(String urlString, Map<String,String> map)
