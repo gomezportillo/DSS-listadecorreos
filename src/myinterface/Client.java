@@ -15,7 +15,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -83,21 +81,18 @@ public class Client {
 	/**
 	 * Create the application.
 	 */
-	public Client() {
+	public Client() 
+	{
 		initialize();
 
-		List<MyUser> userlist = this.getUserListFromServer();
-		for (MyUser u : userlist)
-		{
-			DefaultTableModel model = (DefaultTableModel) table.getModel();
-			model.addRow( new Object[]{ u.getName(), u.getSurname(), u.getEmail() } );
-		}
+		updateTable();
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Initialise the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize() 
+	{
 		frmEmailListClient = new JFrame();
 		frmEmailListClient.setTitle("Email list client");
 		frmEmailListClient.setBounds(100, 100, 876, 516);
@@ -147,8 +142,8 @@ public class Client {
 
 				if (name.equals("") || surname.equals("") || email.equals(""))
 				{
-					lblInfo.setText("Info: Nor name, surname or email can be empty.");
-					lblInfo.setForeground(Color.red);
+					lblInfo.setText("Info: No name, surname nor email can be empty for adding a user.");
+					lblInfo.setForeground(Color.orange);
 				}
 				else
 				{
@@ -176,6 +171,9 @@ public class Client {
 						nameTF.setText("");
 						surnameTF.setText("");
 						emailTF.setText("");
+
+						lblInfo.setText("Info: User with email " + email + " added.");
+						lblInfo.setForeground(Color.green);
 					}
 					else
 					{
@@ -227,7 +225,53 @@ public class Client {
 			 */
 			public void actionPerformed(ActionEvent e) 
 			{
+				String name = nameTF.getText();
+				String surname = surnameTF.getText();
+				String email = emailTF.getText();
 
+				if (name.equals("") || surname.equals("") || email.equals(""))
+				{
+					lblInfo.setText("Info: No name, surname nor email can be empty for updating a user.");
+					lblInfo.setForeground(Color.orange);
+				}
+				else
+				{
+					Map<String,String> parameters = new HashMap<String, String>();
+					parameters.put("action", "updateUser");
+					parameters.put("name", name);
+					parameters.put("surname", surname);
+					parameters.put("email", email);
+					int response_code = 1;
+					try 
+					{
+						ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
+						response_code = response.readInt();
+					} 
+					catch (Exception e1) 
+					{
+						e1.printStackTrace();
+						response_code = 1;
+					}
+
+					if (response_code == 0) 
+					{
+						DefaultTableModel model = (DefaultTableModel) table.getModel();
+						model.addRow( new Object[]{ name, surname, email } );
+						nameTF.setText("");
+						surnameTF.setText("");
+						emailTF.setText("");
+
+						updateTable();
+
+						lblInfo.setText("Info: User with email " + email + " updated.");
+						lblInfo.setForeground(Color.green);
+					}
+					else
+					{
+						lblInfo.setText("Info: Error updating user with email " + email + ".");
+						lblInfo.setForeground(Color.red);
+					}
+				}
 			}
 		});
 		GridBagConstraints gbc_btnUpdateUser = new GridBagConstraints();
@@ -298,13 +342,13 @@ public class Client {
 					}
 					else
 					{
-						lblInfo.setText("Info: Error deleting user.");
+						lblInfo.setText("Info: Error deleting user with email " + email + ".");
 						lblInfo.setForeground(Color.red);
 					}
 				}
 				else
 				{
-					lblInfo.setText("Info: You must select a row");
+					lblInfo.setText("Info: You must select a row.");
 					lblInfo.setForeground(Color.red);
 				}
 			}
@@ -396,5 +440,21 @@ public class Client {
 		}
 		return userList;
 
+	}
+
+	private void updateTable() 
+	{
+		DefaultTableModel aux_model;
+		
+		// Clean table
+		aux_model = (DefaultTableModel) table.getModel();
+		aux_model.setRowCount(0);
+
+		List<MyUser> userlist = this.getUserListFromServer();
+		for (MyUser u : userlist)
+		{
+			aux_model = (DefaultTableModel) table.getModel();
+			aux_model.addRow( new Object[]{ u.getName(), u.getSurname(), u.getEmail() } );
+		}
 	}
 }
