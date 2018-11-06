@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -84,7 +85,7 @@ public class Client {
 	 */
 	public Client() {
 		initialize();
-		
+
 		List<MyUser> userlist = this.getUserListFromServer();
 		for (MyUser u : userlist)
 		{
@@ -178,7 +179,7 @@ public class Client {
 					}
 					else
 					{
-						lblInfo.setText("Info: Error performing POST operation.");
+						lblInfo.setText("Info: Error adding user.");
 						lblInfo.setForeground(Color.red);
 					}
 				}
@@ -255,11 +256,8 @@ public class Client {
 		scrollPane.setViewportView(table);
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		table.setModel(new DefaultTableModel(
-				new Object[][] {
-				},
-				new String[] {
-						"Name", "Surname", "Email"
-				}
+				new Object[][] { },
+				new String[] { "Name", "Surname", "Email" }
 				));
 
 		JButton btnDeleteUser = new JButton("Delete user");
@@ -271,6 +269,44 @@ public class Client {
 			public void actionPerformed(ActionEvent arg0) 
 			{
 
+				int rowIndex = table.getSelectedRow();
+
+				if (rowIndex != -1) 
+				{
+					String email = (String) table.getModel().getValueAt(rowIndex, 2);
+
+					Map<String,String> parameters = new HashMap<String, String>();
+					parameters.put("action", "deleteUser");
+					parameters.put("email", email);
+					int code = 1;
+					try 
+					{
+						ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
+						code = ois.readInt();
+					} 
+					catch (Exception e1) 
+					{
+						e1.printStackTrace();
+						code = 1;
+					}
+
+					if (code == 0)
+					{
+						((DefaultTableModel) table.getModel()).removeRow( rowIndex );
+						lblInfo.setText("Info: User with email " + email + " deleted.");
+						lblInfo.setForeground(Color.green);
+					}
+					else
+					{
+						lblInfo.setText("Info: Error deleting user.");
+						lblInfo.setForeground(Color.red);
+					}
+				}
+				else
+				{
+					lblInfo.setText("Info: You must select a row");
+					lblInfo.setForeground(Color.red);
+				}
 			}
 		});
 		GridBagConstraints gbc_btnDeleteUser = new GridBagConstraints();
@@ -295,7 +331,8 @@ public class Client {
 		menuBar.add(mnMenu);
 
 		JMenuItem mntmExit = new JMenuItem("Exit");
-		mntmExit.addActionListener(new ActionListener() {
+		mntmExit.addActionListener(new ActionListener() 
+		{
 			public void actionPerformed(ActionEvent arg0) 
 			{
 				System.exit(0);
@@ -304,36 +341,27 @@ public class Client {
 		mnMenu.add(mntmExit);
 	}
 
-	@SuppressWarnings("deprecation")
-	public InputStream performPOST(String urlString, Map<String,String> parametros) {
+	public InputStream performPOST(String urlString, Map<String,String> map) 
+	{
 		String parameters = "";
-		boolean primerPar = true;
-		for (Map.Entry<String, String> entry : parametros.entrySet()) {
-			if (!primerPar) 
-			{
-				parameters += "&";
-			} 
-			else 
-			{
-				primerPar = false;
-			}
-			String par = String.format("%s=%s", 
-					URLEncoder.encode(entry.getKey()), 
-					URLEncoder.encode(entry.getValue()));
+		for (Map.Entry<String, String> command : map.entrySet()) 
+		{
+			String par = command.getKey() + "=" + command.getValue() + "&"; 
 			parameters += par;
 		}
+
 		try 
 		{
 			URL url = new URL(urlString);
-			HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
-			conexion.setUseCaches(false);
-			conexion.setRequestMethod("POST");
-			conexion.setDoOutput(true);
-			OutputStream output = conexion.getOutputStream();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.setDoOutput(true);
+			OutputStream output = connection.getOutputStream();
 			output.write(parameters.getBytes());
 			output.flush();
 			output.close();
-			return conexion.getInputStream();
+			return connection.getInputStream();
 		} 
 		catch (MalformedURLException e) 
 		{
@@ -356,6 +384,7 @@ public class Client {
 		Map<String,String> parameters = new HashMap<String, String>();
 		parameters.put("action", "listUsers");
 		List<MyUser> userList = null;
+
 		try 
 		{
 			ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
