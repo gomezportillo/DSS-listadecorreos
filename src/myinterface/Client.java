@@ -108,8 +108,7 @@ public class Client {
 
 				if (name.equals("") || surname.equals("") || email.equals(""))
 				{
-					lblInfo.setText("Info: No name, surname nor email can be empty for adding a user.");
-					lblInfo.setForeground(Color.orange);
+					changeInformationLabel("No name, surname nor email can be empty for adding a user.", Color.orange);
 				}
 				else
 				{
@@ -126,18 +125,15 @@ public class Client {
 						surnameTF.setText("");
 						emailTF.setText("");
 
-						lblInfo.setText("Info: User with email " + user.getEmail() + " added.");
-						lblInfo.setForeground(Color.green);
+						changeInformationLabel("User with email " + user.getEmail() + " added.", Color.green);
 						break;
 
 					case Codes.EMAIL_ALREADY_EXISTS:
-						lblInfo.setText("Info: Error adding user, email " + user.getEmail() + " already exists.");
-						lblInfo.setForeground(Color.red);
+						changeInformationLabel("Error adding user, email " + user.getEmail() + " already exists.", Color.red);
 						break;
 
 					default:
-						lblInfo.setText("Info: Unkown error adding user.");
-						lblInfo.setForeground(Color.red);
+						changeInformationLabel("Unkown error adding user.", Color.red);
 						break;
 					}
 				}
@@ -158,8 +154,7 @@ public class Client {
 
 				if (name.equals("") || surname.equals("") || email.equals(""))
 				{
-					lblInfo.setText("Info: No name, surname nor email can be empty for updating a user.");
-					lblInfo.setForeground(Color.orange);
+					changeInformationLabel("Info: No name, surname nor email can be empty for updating a user.", Color.orange);
 				}
 				else
 				{
@@ -178,18 +173,15 @@ public class Client {
 
 						updateTable();
 
-						lblInfo.setText("Info: User with email " + user.getEmail() + " updated.");
-						lblInfo.setForeground(Color.green);
+						changeInformationLabel("User with email " + user.getEmail() + " updated.", Color.green);
 						break;
 
 					case Codes.EMAIL_NOT_FOUND:
-						lblInfo.setText("Info: Error updating user, email " + email + " not found.");
-						lblInfo.setForeground(Color.red);
+						changeInformationLabel("Error updating user, email " + email + " not found.", Color.red);
 						break;
 
 					default:
-						lblInfo.setText("Info: Unknown error updating user.");
-						lblInfo.setForeground(Color.red);
+						changeInformationLabel("Unknown error updating user.", Color.red);
 						break;
 					}
 				}
@@ -231,25 +223,21 @@ public class Client {
 					{
 					case Codes.SUCCESS:
 						((DefaultTableModel) table.getModel()).removeRow( rowIndex );
-						lblInfo.setText("Info: User with email " + email + " deleted.");
-						lblInfo.setForeground(Color.green);
+						changeInformationLabel("User with email " + email + " deleted.", Color.green);
 						break;
 
 					case Codes.EMAIL_NOT_FOUND:
-						lblInfo.setText("Info: Error deleting user, email " + email + " not found.");
-						lblInfo.setForeground(Color.red);
+						changeInformationLabel("Error deleting user, email " + email + " not found.", Color.red);
 						break;
 
 					default:
-						lblInfo.setText("Info: Unknown error deleting user, email " + email + " not found.");
-						lblInfo.setForeground(Color.red);
+						changeInformationLabel("Unknown error deleting user, email \" + email + \" not found.", Color.red);
 						break;
 					}
 				}
 				else
 				{
-					lblInfo.setText("Info: You must select a row.");
-					lblInfo.setForeground(Color.red);
+					changeInformationLabel("You must select a row.", Color.red);
 				}
 			}
 		});
@@ -404,6 +392,7 @@ public class Client {
 			output.write(parameters.getBytes());
 			output.flush();
 			output.close();
+			
 			return connection.getInputStream();
 		}
 		catch (MalformedURLException e)
@@ -464,7 +453,7 @@ public class Client {
 		parameters.put("name", user.getName());
 		parameters.put("surname", user.getSurname());
 		parameters.put("email", user.getEmail());
-		int response_code = 1;
+		int response_code = Codes.NO_CODE;
 
 		try
 		{
@@ -474,8 +463,14 @@ public class Client {
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			response_code = 1;
+			response_code = Codes.UNKNOWN_ERROR;
 		}
 		return response_code;
+	}
+	
+	public void changeInformationLabel(String message, Color color)
+	{
+		lblInfo.setText("Info: " + message);
+		lblInfo.setForeground(color);
 	}
 }

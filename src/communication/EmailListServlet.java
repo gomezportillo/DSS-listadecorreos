@@ -51,7 +51,7 @@ public class EmailListServlet extends HttpServlet
 				writer.println("<td>" + u.getEmail() + "</td>");
 				writer.println("</tr>");
 			}
-			writer.println("</tbody></table></div></div></body></html>");
+			writer.println("</tbody></table></div></div></body></html>"); //adding bottom tags left on html template 
 		} 
 		else 
 		{
