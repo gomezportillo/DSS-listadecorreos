@@ -167,12 +167,20 @@ public class Client {
 					{
 					case Codes.SUCCESS:
 						DefaultTableModel model = (DefaultTableModel) table.getModel();
-						model.addRow( new Object[]{ user.getName(), user.getSurname(), user.getEmail() } );
 						nameTF.setText("");
 						surnameTF.setText("");
 						emailTF.setText("");
 
-						updateTable();
+						for (int row_index=0; row_index<table.getRowCount(); row_index++)
+						{
+							String aux_email = (String) table.getModel().getValueAt(row_index, 2);
+							if ( aux_email.equals( user.getEmail() ) )
+							{
+								table.getModel().setValueAt(user.getName(), row_index, 0);
+								table.getModel().setValueAt(user.getSurname(), row_index, 1);
+								break;
+							}
+						}
 
 						changeInformationLabel("User with email " + user.getEmail() + " updated.", Color.green);
 						break;
