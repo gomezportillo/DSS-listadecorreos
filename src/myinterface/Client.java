@@ -1,11 +1,23 @@
 package myinterface;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -23,14 +35,18 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 
+import myinterface.Client;
+
 public class Client {
+
+	private static final String servlet_URL = "http://localhost:8080/dss-listadecorreos2/EmailListServlet";
 
 	private JFrame frmEmailListClient;
 	private JTextField nameTF;
 	private JTextField surnameTF;
 	private JTextField emailTF;
 	private JTable table;
-
+	private JLabel lblInfo;
 	/**
 	 * Launch the application.
 	 */
@@ -49,7 +65,6 @@ public class Client {
 				{
 					e.printStackTrace();
 				}
-
 				try 
 				{
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -113,15 +128,48 @@ public class Client {
 			public void actionPerformed(ActionEvent e) 
 			{
 				String name = nameTF.getText();
+				String surname = surnameTF.getText();
 				String email = emailTF.getText();
 
-				if (name != "" && email != "")
+				if (name.equals("") || surname.equals("") || email.equals(""))
 				{
-
+					lblInfo.setText("Info: Nor name, surname or email can be empty.");
+					lblInfo.setForeground(Color.red);
 				}
 				else
 				{
+					Map<String,String> parameters = new HashMap<String, String>();
+					parameters.put("action", "addUser");
+					parameters.put("name", name);
+					parameters.put("surname", surname);
+					parameters.put("email", email);
+					int code = 1;
+					try 
+					{
+						ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
+						code = response.readInt();
+//						String response_str = (String) response.readObject();					
+					} 
+					catch (Exception e1) 
+					{
+						e1.printStackTrace();
+						code = 1;
+					}
 
+					if (code == 0) 
+					{
+						DefaultTableModel model = (DefaultTableModel) table.getModel();
+						model.addRow( new Object[]{ name, surname, email } );
+						nameTF.setText("");
+						surnameTF.setText("");
+						emailTF.setText("");	
+
+					}
+					else
+					{
+						lblInfo.setText("Info: Error performing POST operation.");
+						lblInfo.setForeground(Color.red);
+					}
 				}
 			}
 		});
@@ -144,7 +192,7 @@ public class Client {
 
 		emailTF = new JTextField();
 		GridBagConstraints gbc_textField_1 = new GridBagConstraints();
-		gbc_textField_1.insets = new Insets(0, 0, 5, 0);
+		gbc_textField_1.insets = new Insets(0, 0, 5, 5);
 		gbc_textField_1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField_1.gridx = 3;
 		gbc_textField_1.gridy = 5;
@@ -179,7 +227,6 @@ public class Client {
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		table.setModel(new DefaultTableModel(
 				new Object[][] {
-					{null, null, null},
 				},
 				new String[] {
 						"Name", "Surname", "Email"
@@ -200,6 +247,13 @@ public class Client {
 		gbc_btnDeleteUser.gridy = 12;
 		frmEmailListClient.getContentPane().add(btnDeleteUser, gbc_btnDeleteUser);
 
+		lblInfo = new JLabel("Information regarding the system");
+		GridBagConstraints gbc_lblInfo = new GridBagConstraints();
+		gbc_lblInfo.insets = new Insets(0, 0, 5, 5);
+		gbc_lblInfo.gridx = 3;
+		gbc_lblInfo.gridy = 12;
+		frmEmailListClient.getContentPane().add(lblInfo, gbc_lblInfo);
+
 		JMenuBar menuBar = new JMenuBar();
 		frmEmailListClient.setJMenuBar(menuBar);
 
@@ -214,6 +268,52 @@ public class Client {
 			}
 		});
 		mnMenu.add(mntmExit);
+	}
+
+	@SuppressWarnings("deprecation")
+	public InputStream performPOST(String urlString, Map<String,String> parametros) {
+		String cadenaParametros = "";
+		boolean primerPar = true;
+		for (Map.Entry<String, String> entry : parametros.entrySet()) {
+			if (!primerPar) 
+			{
+				cadenaParametros += "&";
+			} 
+			else 
+			{
+				primerPar = false;
+			}
+			String parDeParametro = String.format("%s=%s", 
+					URLEncoder.encode(entry.getKey()), 
+					URLEncoder.encode(entry.getValue()));
+			cadenaParametros += parDeParametro;
+		}
+		try 
+		{
+			URL url = new URL(urlString);
+			HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
+			conexion.setUseCaches(false);
+			conexion.setRequestMethod("POST");
+			conexion.setDoOutput(true);
+			OutputStream output = conexion.getOutputStream();
+			output.write(cadenaParametros.getBytes());
+			output.flush();
+			output.close();
+			return conexion.getInputStream();
+		} 
+		catch (MalformedURLException e) 
+		{
+			e.printStackTrace();
+		}
+		catch(ProtocolException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
