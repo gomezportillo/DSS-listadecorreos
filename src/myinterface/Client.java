@@ -40,7 +40,7 @@ import myinterface.Client;
 
 public class Client {
 
-	private static final String servlet_URL = "http://localhost:8080/dss-listadecorreos2/EmailListServlet";
+	private static final String servlet_URL = "http://localhost:8080/dss-listadecorreos/EmailListServlet";
 
 	private JFrame frmEmailListClient;
 	private JTextField nameTF;
@@ -48,29 +48,30 @@ public class Client {
 	private JTextField emailTF;
 	private JTable table;
 	private JLabel lblInfo;
+
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) 
+	public static void main(String[] args)
 	{
-		EventQueue.invokeLater(new Runnable() 
+		EventQueue.invokeLater(new Runnable()
 		{
-			public void run() 
+			public void run()
 			{
-				try 
+				try
 				{
 					Client window = new Client();
 					window.frmEmailListClient.setVisible(true);
-				} 
-				catch (Exception e) 
+				}
+				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
-				try 
+				try
 				{
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				} 
-				catch(Exception e) 
+				}
+				catch(Exception e)
 				{
 					System.out.println("Error setting native LAF: " + e);
 				}
@@ -81,7 +82,7 @@ public class Client {
 	/**
 	 * Create the application.
 	 */
-	public Client() 
+	public Client()
 	{
 		initialize();
 
@@ -91,8 +92,147 @@ public class Client {
 	/**
 	 * Initialise the contents of the frame.
 	 */
-	private void initialize() 
+	private void initialize()
 	{
+		JButton btnAddUser = new JButton("Add user");
+		btnAddUser.addActionListener(new ActionListener()
+		{
+			/**
+			 * Pressing "Add user"
+			 */
+			public void actionPerformed(ActionEvent e)
+			{
+				String name = nameTF.getText();
+				String surname = surnameTF.getText();
+				String email = emailTF.getText();
+
+				if (name.equals("") || surname.equals("") || email.equals(""))
+				{
+					lblInfo.setText("Info: No name, surname nor email can be empty for adding a user.");
+					lblInfo.setForeground(Color.orange);
+				}
+				else
+				{
+					MyUser user = new MyUser(name, surname, email);
+
+					int response_code = performActionInServer(user, "addUser");
+
+					if (response_code == 0)
+					{
+						DefaultTableModel model = (DefaultTableModel) table.getModel();
+						model.addRow( new Object[]{ name, surname, email } );
+						nameTF.setText("");
+						surnameTF.setText("");
+						emailTF.setText("");
+
+						lblInfo.setText("Info: User with email " + email + " added.");
+						lblInfo.setForeground(Color.green);
+					}
+					else
+					{
+						lblInfo.setText("Info: Error adding user.");
+						lblInfo.setForeground(Color.red);
+					}
+				}
+			}
+		});
+
+		JButton btnUpdateUser = new JButton("Update user");
+		btnUpdateUser.addActionListener(new ActionListener()
+		{
+			/**
+			 * Pressing "Update user"
+			 */
+			public void actionPerformed(ActionEvent e)
+			{
+				String name = nameTF.getText();
+				String surname = surnameTF.getText();
+				String email = emailTF.getText();
+
+				if (name.equals("") || surname.equals("") || email.equals(""))
+				{
+					lblInfo.setText("Info: No name, surname nor email can be empty for updating a user.");
+					lblInfo.setForeground(Color.orange);
+				}
+				else
+				{
+					MyUser user = new MyUser(name, surname, email);
+
+					int response_code = performActionInServer(user, "updateUser");
+
+					if (response_code == 0)
+					{
+						DefaultTableModel model = (DefaultTableModel) table.getModel();
+						model.addRow( new Object[]{ name, surname, email } );
+						nameTF.setText("");
+						surnameTF.setText("");
+						emailTF.setText("");
+
+						updateTable();
+
+						lblInfo.setText("Info: User with email " + email + " updated.");
+						lblInfo.setForeground(Color.green);
+					}
+					else
+					{
+						lblInfo.setText("Info: Error updating user with email " + email + ".");
+						lblInfo.setForeground(Color.red);
+					}
+				}
+			}
+		});
+
+		JButton btnDeleteUser = new JButton("Delete user");
+		btnDeleteUser.addActionListener(new ActionListener()
+		{
+			/**
+			 * Pressing "Delete user"
+			 */
+			public void actionPerformed(ActionEvent arg0)
+			{
+
+				int rowIndex = table.getSelectedRow();
+
+				if (rowIndex != -1)
+				{
+					String email = (String) table.getModel().getValueAt(rowIndex, 2);
+
+					Map<String,String> parameters = new HashMap<String, String>();
+					parameters.put("action", "deleteUser");
+					parameters.put("email", email);
+					int response_code = 1;
+
+					try
+					{
+						ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
+						response_code = ois.readInt();
+					}
+					catch (Exception e1)
+					{
+						e1.printStackTrace();
+						response_code = 1;
+					}
+
+					if (response_code == 0)
+					{
+						((DefaultTableModel) table.getModel()).removeRow( rowIndex );
+						lblInfo.setText("Info: User with email " + email + " deleted.");
+						lblInfo.setForeground(Color.green);
+					}
+					else
+					{
+						lblInfo.setText("Info: Error deleting user with email " + email + ".");
+						lblInfo.setForeground(Color.red);
+					}
+				}
+				else
+				{
+					lblInfo.setText("Info: You must select a row.");
+					lblInfo.setForeground(Color.red);
+				}
+			}
+		});
+
 		frmEmailListClient = new JFrame();
 		frmEmailListClient.setTitle("Email list client");
 		frmEmailListClient.setBounds(100, 100, 876, 516);
@@ -128,49 +268,6 @@ public class Client {
 		gbc_lblEmail.gridy = 3;
 		frmEmailListClient.getContentPane().add(lblEmail, gbc_lblEmail);
 
-		JButton btnAddUser = new JButton("Add user");
-		btnAddUser.addActionListener(new ActionListener() 
-		{
-			/**
-			 * Pressing "Add user"
-			 */
-			public void actionPerformed(ActionEvent e) 
-			{
-				String name = nameTF.getText();
-				String surname = surnameTF.getText();
-				String email = emailTF.getText();
-								
-				if (name.equals("") || surname.equals("") || email.equals(""))
-				{
-					lblInfo.setText("Info: No name, surname nor email can be empty for adding a user.");
-					lblInfo.setForeground(Color.orange);
-				}
-				else
-				{
-					MyUser user = new MyUser(name, surname, email);
-
-					int response_code = performActionInServer(user, "addUser");
-
-					if (response_code == 0) 
-					{
-						DefaultTableModel model = (DefaultTableModel) table.getModel();
-						model.addRow( new Object[]{ name, surname, email } );
-						nameTF.setText("");
-						surnameTF.setText("");
-						emailTF.setText("");
-
-						lblInfo.setText("Info: User with email " + email + " added.");
-						lblInfo.setForeground(Color.green);
-					}
-					else
-					{
-						lblInfo.setText("Info: Error adding user.");
-						lblInfo.setForeground(Color.red);
-					}
-				}
-			}
-		});
-
 		surnameTF = new JTextField();
 		GridBagConstraints gbc_textField1 = new GridBagConstraints();
 		gbc_textField1.gridwidth = 2;
@@ -204,50 +301,6 @@ public class Client {
 		gbc_btnAddUser.gridy = 7;
 		frmEmailListClient.getContentPane().add(btnAddUser, gbc_btnAddUser);
 
-		JButton btnUpdateUser = new JButton("Update user");
-		btnUpdateUser.addActionListener(new ActionListener() 
-		{
-			/**
-			 * Pressing "Update user"
-			 */
-			public void actionPerformed(ActionEvent e) 
-			{
-				String name = nameTF.getText();
-				String surname = surnameTF.getText();
-				String email = emailTF.getText();
-
-				if (name.equals("") || surname.equals("") || email.equals(""))
-				{
-					lblInfo.setText("Info: No name, surname nor email can be empty for updating a user.");
-					lblInfo.setForeground(Color.orange);
-				}
-				else
-				{
-					MyUser user = new MyUser(name, surname, email);
-
-					int response_code = performActionInServer(user, "updateUser");
-					
-					if (response_code == 0) 
-					{
-						DefaultTableModel model = (DefaultTableModel) table.getModel();
-						model.addRow( new Object[]{ name, surname, email } );
-						nameTF.setText("");
-						surnameTF.setText("");
-						emailTF.setText("");
-
-						updateTable();
-
-						lblInfo.setText("Info: User with email " + email + " updated.");
-						lblInfo.setForeground(Color.green);
-					}
-					else
-					{
-						lblInfo.setText("Info: Error updating user with email " + email + ".");
-						lblInfo.setForeground(Color.red);
-					}
-				}
-			}
-		});
 		GridBagConstraints gbc_btnUpdateUser = new GridBagConstraints();
 		gbc_btnUpdateUser.insets = new Insets(0, 0, 5, 5);
 		gbc_btnUpdateUser.gridx = 3;
@@ -278,56 +331,6 @@ public class Client {
 				new String[] { "Name", "Surname", "Email" }
 				));
 
-		JButton btnDeleteUser = new JButton("Delete user");
-		btnDeleteUser.addActionListener(new ActionListener() 
-		{
-			/**
-			 * Pressing "Delete user"
-			 */
-			public void actionPerformed(ActionEvent arg0) 
-			{
-
-				int rowIndex = table.getSelectedRow();
-
-				if (rowIndex != -1) 
-				{
-					String email = (String) table.getModel().getValueAt(rowIndex, 2);
-
-					Map<String,String> parameters = new HashMap<String, String>();
-					parameters.put("action", "deleteUser");
-					parameters.put("email", email);
-					int response_code = 1;
-				
-					try 
-					{
-						ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
-						response_code = ois.readInt();
-					} 
-					catch (Exception e1) 
-					{
-						e1.printStackTrace();
-						response_code = 1;
-					}
-
-					if (response_code == 0)
-					{
-						((DefaultTableModel) table.getModel()).removeRow( rowIndex );
-						lblInfo.setText("Info: User with email " + email + " deleted.");
-						lblInfo.setForeground(Color.green);
-					}
-					else
-					{
-						lblInfo.setText("Info: Error deleting user with email " + email + ".");
-						lblInfo.setForeground(Color.red);
-					}
-				}
-				else
-				{
-					lblInfo.setText("Info: You must select a row.");
-					lblInfo.setForeground(Color.red);
-				}
-			}
-		});
 		GridBagConstraints gbc_btnDeleteUser = new GridBagConstraints();
 		gbc_btnDeleteUser.gridwidth = 2;
 		gbc_btnDeleteUser.insets = new Insets(0, 0, 5, 5);
@@ -350,9 +353,9 @@ public class Client {
 		menuBar.add(mnMenu);
 
 		JMenuItem mntmExit = new JMenuItem("Exit");
-		mntmExit.addActionListener(new ActionListener() 
+		mntmExit.addActionListener(new ActionListener()
 		{
-			public void actionPerformed(ActionEvent arg0) 
+			public void actionPerformed(ActionEvent arg0)
 			{
 				System.exit(0);
 			}
@@ -360,16 +363,16 @@ public class Client {
 		mnMenu.add(mntmExit);
 	}
 
-	public InputStream performPOST(String urlString, Map<String,String> map) 
+	public InputStream performPOST(String urlString, Map<String,String> map)
 	{
 		String parameters = "";
-		for (Map.Entry<String, String> command : map.entrySet()) 
+		for (Map.Entry<String, String> command : map.entrySet())
 		{
-			String par = command.getKey() + "=" + command.getValue() + "&"; 
-			parameters += par;
+			String aux_par = command.getKey() + "=" + command.getValue() + "&";
+			parameters += aux_par;
 		}
 
-		try 
+		try
 		{
 			URL url = new URL(urlString);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -381,8 +384,8 @@ public class Client {
 			output.flush();
 			output.close();
 			return connection.getInputStream();
-		} 
-		catch (MalformedURLException e) 
+		}
+		catch (MalformedURLException e)
 		{
 			e.printStackTrace();
 		}
@@ -390,7 +393,7 @@ public class Client {
 		{
 			e.printStackTrace();
 		}
-		catch (IOException e) 
+		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -398,18 +401,18 @@ public class Client {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<MyUser> getUserListFromServer() 
+	private List<MyUser> getUserListFromServer()
 	{
+		List<MyUser> userList = null;
 		Map<String,String> parameters = new HashMap<String, String>();
 		parameters.put("action", "listUsers");
-		List<MyUser> userList = null;
 
-		try 
+		try
 		{
 			ObjectInputStream ois = new ObjectInputStream( performPOST(servlet_URL, parameters) );
-			userList = (List<MyUser>) ois.readObject();	
-		} 
-		catch (Exception e) 
+			userList = (List<MyUser>) ois.readObject();
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -417,10 +420,10 @@ public class Client {
 
 	}
 
-	private void updateTable() 
+	private void updateTable()
 	{
 		DefaultTableModel aux_model;
-		
+
 		// Clean table
 		aux_model = (DefaultTableModel) table.getModel();
 		aux_model.setRowCount(0);
@@ -432,7 +435,7 @@ public class Client {
 			aux_model.addRow( new Object[]{ u.getName(), u.getSurname(), u.getEmail() } );
 		}
 	}
-	
+
 	private int performActionInServer(MyUser user, String action)
 	{
 		Map<String,String> parameters = new HashMap<String, String>();
@@ -441,12 +444,13 @@ public class Client {
 		parameters.put("surname", user.getSurname());
 		parameters.put("email", user.getEmail());
 		int response_code = 1;
-		try 
+
+		try
 		{
 			ObjectInputStream response = new ObjectInputStream(performPOST(servlet_URL, parameters));
 			response_code = response.readInt();
-		} 
-		catch (Exception e) 
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			response_code = 1;
